@@ -1,4 +1,4 @@
-import os,sys,requests,json
+import os,sys,requests,json,schedule
 
 class Feedback:
 	feedback_id = ""
@@ -18,6 +18,30 @@ class User:
 		self.username = username
 		self.email = email
 		self.currency = currency
+
+class Coupon:
+	cid = ""
+	seller_id = ""
+	code = ""
+	value = ""
+	def __init__(self,cid,seller_id,code,value):
+		self.cid = cid
+		self.seller_id = seller_id
+		self.code = code
+		self.value = value
+
+class Query:
+	qid = ""
+	subject = ""
+	email =""
+	message = ""
+	created_at = ""
+	def __init__(self,qid,subject,email,message,created_at):
+		self.qid = qid
+		self.subject = subject
+		self.email = email
+		self.message = message
+		self.created_at = created_at
 
 class Shoppy:
 	apiKey = ""
@@ -76,14 +100,6 @@ class Shoppy:
 		res=requests.get(url=f"https://shoppy.gg/api/v1/feedbacks/{fid}",headers={'Content-Type': 'application/json','Authorization':self.apiKey,'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36'})
 		#print(f' [~] shoppy feedback request -> {str(res.status_code)}')
 		return res
-	def getTickets(self):
-		res=requests.get(url=f"https://shoppy.gg/api/v1/tickets",headers={'Content-Type': 'application/json','Authorization':self.apiKey,'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36'})
-		#print(f' [~] shoppy ticket request -> {str(res.status_code)}')
-		return res
-	def getTicket(self,tid):
-		res=requests.get(url=f"https://shoppy.gg/api/v1/tickets/{tid}",headers={'Content-Type': 'application/json','Authorization':self.apiKey,'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36'})
-		#print(f' [~] shoppy ticket request -> {str(res.status_code)}')
-		return res	
 	def getSettings(self):
 		res=requests.get(url=f"https://shoppy.gg/api/v1/settings",headers={'Content-Type': 'application/json','Authorization':self.apiKey,'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36'})
 		#print(f' [~] shoppy settings request -> {str(res.status_code)}')
@@ -101,15 +117,23 @@ class Shoppy:
 		user = settings["user"]["username"]
 		user_c = User(settings["user"]["username"],settings["user"]["email"],settings["settings"]["currency"])
 		return user_c
+	def FormatQueries(self):
+		data = json.loads(self.getQueries().text)
+		queries = []
+		for i in range(1000):
+			try:
+				queries.append(Query(data[i]["id"],data[i]["subject"],data[i]["email"],data[i]["message"],data[i]["created_at"]))
+			except:
+				return queries
+		return queries
+	def FormatCoupons(self):
+		data = json.loads(self.getCoupons().text)
+		coupons = []
+		for i in range(1000):
+			try:
+				coupons.append(Coupon(data[i]["id"],data[i]["seller_id"],data[i]["code"],data[i]["value"]))
+			except:
+				return coupons
+		return coupons
 
 
-
-
-
-os.system("cls")
-shoppy_api = Shoppy('QE7opngxLgMA8QslEWMFFmJR0pyjmvPidKIPu7t9WFyCmli0RE')
-
-user = shoppy_api.FormatSettings()
-
-print('  shoppy user report -> ')
-print(f'   username -> {user.username}\n   email -> {user.email}\n   currency -> {user.currency}')
