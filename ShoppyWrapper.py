@@ -1,4 +1,4 @@
-import os,sys,requests,json,schedule
+import os,sys,requests,json
 
 class Feedback:
 	feedback_id = ""
@@ -42,6 +42,22 @@ class Query:
 		self.email = email
 		self.message = message
 		self.created_at = created_at
+
+class Product:
+	pid = ""
+	title = ""
+	description = ""
+	price = 0
+	currency = ""
+	stock = 0
+	def __init__(self,pid,title,description,price,currency,stock):
+		self.pid = pid
+		self.title = title
+		self.description = description
+		self.price = price
+		self.currency = currency
+		self.stock = stock
+
 
 class Shoppy:
 	apiKey = ""
@@ -136,4 +152,12 @@ class Shoppy:
 				return coupons
 		return coupons
 
-
+	def FormatProducts(self):
+		data = json.loads(self.getProducts().text)
+		products = []
+		for i in range(1000):
+			try:
+				products.append(Product(data[i]["id"],data[i]["title"],data[i]["description"],data[i]["price"],data[i]["currency"],data[i]["stock"]))
+			except:
+				return products
+		return products
